@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>家務輪班表</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f5f2ec;
+    --card: #ffffff;
+    --text: #1a1a18;
+    --muted: #7a7a72;
+    --border: #e0ddd5;
+    --accent: #d85a30;
+    --accent-light: #faece7;
+    --green: #1d9e75;
+    --green-light: #e1f5ee;
+    --blue: #185fa5;
+    --blue-light: #e6f1fb;
+    --amber: #ba7517;
+    --amber-light: #faeeda;
+  }
+
+  body {
+    font-family: 'Noto Sans TC', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 2rem 1rem 4rem;
+  }
+
+  .container {
+    max-width: 480px;
+    margin: 0 auto;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+
+  header h1 {
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: var(--text);
+  }
+
+  header p {
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  .week-nav {
+    display: flex;
+    align-items: center;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 10px 12px;
+    margin-bottom: 1.5rem;
+    gap: 8px;
+  }
+
+  .week-nav button {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    width: 36px;
+    height: 36px;
+    font-size: 16px;
+    cursor: pointer;
+    color: var(--text);
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.15s;
+  }
+  .week-nav button:hover { background: var(--border); }
+
+  .week-nav .week-label {
+    flex: 1;
+    text-align: center;
+    font-size: 15px;
+    font-weight: 500;
+  }
+
+  .today-btn {
+    background: var(--accent-light) !important;
+    border-color: var(--accent) !important;
+    color: var(--accent) !important;
+    font-size: 11px !important;
+    width: auto !important;
+    padding: 0 10px;
+    font-weight: 700;
+    white-space: nowrap;
+    font-family: 'Noto Sans TC', sans-serif;
+  }
+
+  .zones-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .zone-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .zone-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+  }
+  .zone-card.bathroom::before { background: var(--blue); }
+  .zone-card.kitchen::before { background: var(--accent); }
+  .zone-card.floor::before { background: var(--green); }
+  .zone-card.trash::before { background: var(--amber); }
+
+  .zone-emoji { font-size: 22px; margin-bottom: 6px; }
+
+  .zone-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+    margin-bottom: 8px;
+  }
+
+  .zone-person {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.2;
+  }
+
+  .zone-person-2 {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid var(--border);
+  }
+
+  .zone-subtask {
+    font-size: 10px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  .cost-badge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 500;
+    padding: 2px 6px;
+    border-radius: 6px;
+    margin-top: 8px;
+  }
+  .bathroom .cost-badge { background: var(--blue-light); color: var(--blue); }
+  .kitchen .cost-badge { background: var(--accent-light); color: var(--accent); }
+  .floor .cost-badge { background: var(--green-light); color: var(--green); }
+  .trash .cost-badge { background: var(--amber-light); color: var(--amber); }
+
+  .tasks-list {
+    font-size: 10px;
+    color: var(--muted);
+    margin-top: 8px;
+    line-height: 1.7;
+    border-top: 1px solid var(--border);
+    padding-top: 8px;
+  }
+
+  .wa-section {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px;
+  }
+
+  .wa-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--muted);
+    letter-spacing: 0.06em;
+    margin-bottom: 10px;
+  }
+
+  .wa-msg {
+    font-family: 'Noto Sans TC', monospace;
+    font-size: 13px;
+    line-height: 1.8;
+    white-space: pre-wrap;
+    color: var(--text);
+    background: #f9f7f3;
+    border-radius: 10px;
+    padding: 12px;
+    border: 1px solid var(--border);
+    margin-bottom: 10px;
+  }
+
+  .copy-btn {
+    width: 100%;
+    padding: 12px;
+    font-size: 14px;
+    font-weight: 700;
+    font-family: 'Noto Sans TC', sans-serif;
+    letter-spacing: 0.04em;
+    background: var(--text);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: opacity 0.15s, background 0.2s;
+  }
+  .copy-btn:hover { opacity: 0.85; }
+  .copy-btn.copied { background: var(--green); }
+
+  footer {
+    text-align: center;
+    margin-top: 2rem;
+    font-size: 11px;
+    color: var(--muted);
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>🏠 家務輪班表</h1>
+    <p>Charissa · Sonya · Yen · Jendy</p>
+  </header>
+
+  <div class="week-nav">
+    <button id="prev">&#8592;</button>
+    <span class="week-label" id="week-label"></span>
+    <button class="today-btn" id="today-btn">本週</button>
+    <button id="next">&#8594;</button>
+  </div>
+
+  <div class="zones-grid" id="zones"></div>
+
+  <div class="wa-section">
+    <div class="wa-label">WHATSAPP 訊息</div>
+    <div class="wa-msg" id="wa-msg"></div>
+    <button class="copy-btn" id="copy-btn">複製訊息</button>
+  </div>
+
+  <footer>每週自動更新 · 點「本週」回到當前週次</footer>
+</div>
+
+<script>
+const housemates = ['Charissa', 'Sonya', 'Yen', 'Jendy'];
+
+const zones = [
+  {
+    id: 'bathroom',
+    name: '廁所',
+    emoji: '🚽',
+    cost: 8,
+    tasks: ['馬桶蓋灰塵與毛髮', '牆壁隙縫', '玻璃水漬與鏡面', '馬桶清潔劑置換', '洗澡排水孔槽清理'],
+    rotation: [0, 1, 2, 3]
+  },
+  {
+    id: 'kitchen',
+    name: '廚房',
+    emoji: '🍳',
+    cost: 5,
+    tasks: ['廚餘桶清洗', '熱水壺清洗', '電磁爐表面', '鍋蓋清洗與置放區清潔'],
+    rotation: [2, 3, 0, 1]
+  },
+  {
+    id: 'floor',
+    name: '地板',
+    emoji: '🧹',
+    cost: 5,
+    tasks: ['客廳地板與桌面', '走廊地板'],
+    rotation: [2, 3, 0, 1]
+  }
+];
+
+const trashZone = {
+  id: 'trash',
+  name: '垃圾',
+  emoji: '🗑️',
+  cost: 5,
+  task1: '一般垃圾＋廁所垃圾',
+  task2: '回收垃圾＋倒廚餘＋戶外玻璃',
+  rotation1: [3, 2, 1, 0],
+  rotation2: [1, 0, 3, 2]
+};
+
+const anchor = new Date('2025-05-11T00:00:00');
+
+function getWeekOffset(date) {
+  const ms = date - anchor;
+  return Math.floor(ms / (7 * 86400000));
+}
+
+function getWeekStart(offset) {
+  const d = new Date(anchor);
+  d.setDate(d.getDate() + offset * 7);
+  return d;
+}
+
+function fmt(d) {
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return m + '/' + day;
+}
+
+let currentOffset = getWeekOffset(new Date());
+
+function render() {
+  const weekStart = getWeekStart(currentOffset);
+  const weekEnd = new Date(weekStart);
+  weekEnd.setDate(weekEnd.getDate() + 6);
+  document.getElementById('week-label').textContent = fmt(weekStart) + ' – ' + fmt(weekEnd);
+
+  const idx = ((currentOffset % 4) + 4) % 4;
+
+  let html = '';
+  let waLines = ['📋 *家務輪班 ' + fmt(weekStart) + '－' + fmt(weekEnd) + '*', ''];
+
+  zones.forEach(z => {
+    const person = housemates[z.rotation[idx]];
+    html += '<div class="zone-card ' + z.id + '">' +
+      '<div class="zone-emoji">' + z.emoji + '</div>' +
+      '<div class="zone-title">' + z.name + '</div>' +
+      '<div class="zone-person">' + person + '</div>' +
+      '<div class="cost-badge">代工費 €' + z.cost + '</div>' +
+      '<div class="tasks-list">' + z.tasks.join('<br>') + '</div>' +
+      '</div>';
+    waLines.push(z.emoji + ' *' + z.name + '*：' + person);
+  });
+
+  const p1 = housemates[trashZone.rotation1[idx]];
+  const p2 = housemates[trashZone.rotation2[idx]];
+  html += '<div class="zone-card trash">' +
+    '<div class="zone-emoji">' + trashZone.emoji + '</div>' +
+    '<div class="zone-title">' + trashZone.name + '</div>' +
+    '<div class="zone-person">' + p1 + '</div>' +
+    '<div class="zone-subtask">' + trashZone.task1 + '</div>' +
+    '<div class="zone-person-2">' +
+      '<div class="zone-person">' + p2 + '</div>' +
+      '<div class="zone-subtask">' + trashZone.task2 + '</div>' +
+    '</div>' +
+    '<div class="cost-badge">代工費 €' + trashZone.cost + '</div>' +
+    '</div>';
+
+  waLines.push(trashZone.emoji + ' *垃圾*');
+  waLines.push('  一般垃圾：' + p1);
+  waLines.push('  回收垃圾：' + p2);
+  waLines.push('');
+  waLines.push('_如果當週無法完成，請自行協調換班！_');
+
+  document.getElementById('zones').innerHTML = html;
+  document.getElementById('wa-msg').textContent = waLines.join('\n');
+  document.getElementById('copy-btn').textContent = '複製訊息';
+  document.getElementById('copy-btn').classList.remove('copied');
+}
+
+document.getElementById('prev').addEventListener('click', function() { currentOffset--; render(); });
+document.getElementById('next').addEventListener('click', function() { currentOffset++; render(); });
+document.getElementById('today-btn').addEventListener('click', function() {
+  currentOffset = getWeekOffset(new Date()); render();
+});
+
+document.getElementById('copy-btn').addEventListener('click', function() {
+  var text = document.getElementById('wa-msg').textContent;
+  navigator.clipboard.writeText(text).then(function() {
+    var btn = document.getElementById('copy-btn');
+    btn.textContent = '已複製！✓';
+    btn.classList.add('copied');
+  });
+});
+
+render();
+</script>
+</body>
+</html>
