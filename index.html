@@ -178,50 +178,9 @@
     padding-top: 8px;
   }
 
-  .wa-section {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 14px;
-  }
 
-  .wa-label {
-    font-size: 12px;
-    font-weight: 700;
-    color: var(--muted);
-    letter-spacing: 0.06em;
-    margin-bottom: 10px;
-  }
 
-  .wa-msg {
-    font-family: 'Noto Sans TC', monospace;
-    font-size: 13px;
-    line-height: 1.8;
-    white-space: pre-wrap;
-    color: var(--text);
-    background: #f9f7f3;
-    border-radius: 10px;
-    padding: 12px;
-    border: 1px solid var(--border);
-    margin-bottom: 10px;
-  }
 
-  .copy-btn {
-    width: 100%;
-    padding: 12px;
-    font-size: 14px;
-    font-weight: 700;
-    font-family: 'Noto Sans TC', sans-serif;
-    letter-spacing: 0.04em;
-    background: var(--text);
-    color: #fff;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-    transition: opacity 0.15s, background 0.2s;
-  }
-  .copy-btn:hover { opacity: 0.85; }
-  .copy-btn.copied { background: var(--green); }
 
   footer {
     text-align: center;
@@ -246,12 +205,6 @@
   </div>
 
   <div class="zones-grid" id="zones"></div>
-
-  <div class="wa-section">
-    <div class="wa-label">WHATSAPP 訊息</div>
-    <div class="wa-msg" id="wa-msg"></div>
-    <button class="copy-btn" id="copy-btn">複製訊息</button>
-  </div>
 
   <footer>每週自動更新 · 點「本週」回到當前週次</footer>
 </div>
@@ -327,8 +280,6 @@ function render() {
   const idx = ((currentOffset % 4) + 4) % 4;
 
   let html = '';
-  let waLines = ['📋 *家務輪班 ' + fmt(weekStart) + '－' + fmt(weekEnd) + '*', ''];
-
   zones.forEach(z => {
     const person = housemates[z.rotation[idx]];
     html += '<div class="zone-card ' + z.id + '">' +
@@ -338,7 +289,6 @@ function render() {
       '<div class="zone-person" style="margin-top:8px">' + person + '</div>' +
       '<div class="tasks-list">' + z.tasks.join('<br>') + '</div>' +
       '</div>';
-    waLines.push(z.emoji + ' *' + z.name + '*：' + person);
   });
 
   const p1 = housemates[trashZone.rotation1[idx]];
@@ -355,31 +305,14 @@ function render() {
     '</div>' +
     '</div>';
 
-  waLines.push(trashZone.emoji + ' *垃圾*');
-  waLines.push('  一般垃圾：' + p1);
-  waLines.push('  回收垃圾：' + p2);
-  waLines.push('');
-  waLines.push('_如果當週無法完成，請自行協調換班！_');
 
   document.getElementById('zones').innerHTML = html;
-  document.getElementById('wa-msg').textContent = waLines.join('\n');
-  document.getElementById('copy-btn').textContent = '複製訊息';
-  document.getElementById('copy-btn').classList.remove('copied');
 }
 
 document.getElementById('prev').addEventListener('click', function() { currentOffset--; render(); });
 document.getElementById('next').addEventListener('click', function() { currentOffset++; render(); });
 document.getElementById('today-btn').addEventListener('click', function() {
   currentOffset = getWeekOffset(new Date()); render();
-});
-
-document.getElementById('copy-btn').addEventListener('click', function() {
-  var text = document.getElementById('wa-msg').textContent;
-  navigator.clipboard.writeText(text).then(function() {
-    var btn = document.getElementById('copy-btn');
-    btn.textContent = '已複製！✓';
-    btn.classList.add('copied');
-  });
 });
 
 render();
